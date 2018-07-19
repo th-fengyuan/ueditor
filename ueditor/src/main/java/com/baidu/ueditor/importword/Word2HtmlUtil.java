@@ -3,16 +3,21 @@ package com.baidu.ueditor.importword;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -21,7 +26,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hwpf.HWPFDocument;
@@ -48,9 +52,13 @@ import org.w3c.dom.css.CSSStyleSheet;
 import com.steadystate.css.parser.CSSOMParser;
 
 /**
- * 
- * @author TH_FengYuan
- *
+ * Created by 天涯06 on 2017-02-24. 使用的jar包： jsoup-1.10.2.jar
+ * ooxml-schemas-1.1.jar openxml4j-1.0-beta.jar
+ * org.apache.poi.xwpf.converter.core-1.0.6.jar
+ * org.apache.poi.xwpf.converter.xhtml-1.0.6.jar poi-3.13-20150929.jar
+ * poi-ooxml-3.13-20150929.jar poi-scratchpad-3.13-20150929.jar
+ * xmlbeans-2.6.0.jar xml-apis-1.0.b2.jar jsoup-1.8.3.jar cssparser-0.9.25.jar
+ * sac-1.3.jar commons-io-2.4.jar
  */
 public class Word2HtmlUtil {
 
@@ -60,7 +68,7 @@ public class Word2HtmlUtil {
 	private boolean isImgFile;
 	private File folder;
 	private String webPath;
-
+	private Map<String, String> picMap = new HashMap<String, String>();
 	private Word2HtmlUtil() {
 	}
 
@@ -234,18 +242,41 @@ public class Word2HtmlUtil {
 				@Override
 				public String savePicture(byte[] content, PictureType pictureType, String suggestedName,
 						float widthInches, float heightInches) {
-					return suggestedName;
+					String fileType = getFileType(suggestedName);
+					if(isImgFile){
+						String fileName = getNewFileName(fileType, 6);
+						File file = new File(folder, fileName);
+						try {
+							OutputStream os = null;
+							try {
+								os = new FileOutputStream(file);
+								os.write(content);
+							} finally {
+								if (os != null) {
+									os.close();
+								}
+							}
+						} catch (Exception e) {
+							throw new RuntimeException(e);
+						}
+						return webPath+fileName;
+					}else{
+						String pic64 = Base64.getEncoder().encodeToString(content);// 转成Base64
+						return  "data:image/" + fileType + ";base64," + pic64;
+					}
 				}
 			});
 			wordToHtmlConverter.processDocument(wordDocument);
 			// 获取xml文档
 			document = wordToHtmlConverter.getDocument();
-			parseDocImg(wordDocument);
+			parseImg();
 		} finally {
-			is.close();
+			if (is != null) {
+				is.close();
+			}
 		}
 	}
-
+	
 	/**
 	 * 解析docx文档
 	 * 
@@ -265,6 +296,8 @@ public class Word2HtmlUtil {
 		} finally {
 			if (is != null) {
 				is.close();
+			}
+			if (baOut != null) {
 				baOut.close();
 			}
 		}
@@ -275,12 +308,17 @@ public class Word2HtmlUtil {
 	 * 
 	 * @param picMap
 	 */
-	private void parseImg(Map<String, String> picMap) {
+	private void parseImg() {
 		NodeList imgs = document.getElementsByTagName("img");
 		for (int i = 0; i < imgs.getLength(); i++) {
 			Element item = (Element) imgs.item(i);
-			String src = item.getAttribute("src");
-			item.setAttribute("src", picMap.get(src));
+			if(!isDoc){
+				String src = item.getAttribute("src");
+				String imgPath = picMap.get(src);
+				if(imgPath!=null && !"".equals(imgPath)){
+					item.setAttribute("src",imgPath);
+				}
+			}
 			String height;
 			String width;
 			String temp;
@@ -291,7 +329,7 @@ public class Word2HtmlUtil {
 				String[] widthStyle = split[1].split(":");
 				height = Math.ceil(Double.parseDouble(heightStyle[1].replace("in", "")) * 96) + "px";
 				width = Math.ceil(Double.parseDouble(widthStyle[1].replace("in", "")) * 96) + "px";
-				if(!"height".equals(heightStyle[0])){
+				if (!"height".equals(heightStyle[0])) {
 					temp = height;
 					height = width;
 					width = temp;
@@ -306,7 +344,6 @@ public class Word2HtmlUtil {
 	}
 
 	private void parseDocxImg(XWPFDocument xwpfDocument) throws Exception {
-		Map<String, String> picMap = new HashMap<String, String>();
 		// 获取文档上的图片数据
 		List<XWPFPictureData> pics = xwpfDocument.getAllPictures();
 		if (pics == null) {
@@ -321,49 +358,46 @@ public class Word2HtmlUtil {
 				FileUtils.writeByteArrayToFile(imgFile, picData.getData());
 				picMap.put(imgKey, webPath + fileName);
 			} else {
-				String pic64 = Base64.encodeBase64String(picData.getData());// 转成Base64
+				String pic64 = Base64.getEncoder().encodeToString(picData.getData());// 转成Base64
 				picMap.put(imgKey, "data:image/" + picType + ";base64," + pic64);
 			}
 		}
-		if (picMap.size() > 0) {
-			parseImg(picMap);
-		}
+		parseImg();
 	}
 
-	/**
-	 * 处理Doc的图片 将图片转换成64位编码，插入的文档中
-	 * 
-	 * @param pics
-	 * @param document
-	 * @throws Exception
-	 */
-	private void parseDocImg(HWPFDocument wordDocument) throws Exception {
-		Map<String, String> picMap = new HashMap<String, String>();
-		// 获取文档上的所有图片
-		List<Picture> pics = wordDocument.getPicturesTable().getAllPictures();
-		if (pics == null) {
-			return;
-		}
-		ByteArrayOutputStream baops = new ByteArrayOutputStream();
-		for (Picture pic : pics) {
-			baops.reset();// 清空流
-			pic.writeImageContent(baops);// 将图片写入二进制流中
-			String picName = pic.suggestFullFileName();// 获取文件名
-			String fileType = getFileType(picName);
-			if (isImgFile) {
-				String fileName = this.getNewFileName(fileType, 6);
-				File imgFile = new File(folder, fileName);
-				FileUtils.writeByteArrayToFile(imgFile, baops.toByteArray());
-				picMap.put(picName, webPath + fileName);
-			} else {
-				String pic64 = Base64.encodeBase64String(baops.toByteArray());// 转成Base64
-				picMap.put(picName, "data:image/" + fileType + ";base64," + pic64);
-			}
-		}
-		if (picMap.size() > 0) {
-			parseImg(picMap);
-		}
-	}
+//	/**
+//	 * 处理Doc的图片 将图片转换成64位编码，插入的文档中
+//	 * 
+//	 * @param pics
+//	 * @param document
+//	 * @throws Exception
+//	 */
+//	private void parseDocImg(HWPFDocument wordDocument) throws Exception {
+//		// 获取文档上的所有图片
+//		List<Picture> pics = wordDocument.getPicturesTable().getAllPictures();
+//		if (pics == null) {
+//			return;
+//		}
+//		ByteArrayOutputStream baops = new ByteArrayOutputStream();
+//		for (Picture pic : pics) {
+//			baops.reset();// 清空流
+//			pic.writeImageContent(baops);// 将图片写入二进制流中
+//			String picName = pic.suggestFullFileName();// 获取文件名
+//			String fileType = getFileType(picName);
+//			if (isImgFile) {
+//				String fileName = getNewFileName(fileType, 6);
+//				File imgFile = new File(folder, fileName);
+//				FileUtils.writeByteArrayToFile(imgFile, baops.toByteArray());
+//				picMap.put(picName, webPath + fileName);
+//			} else {
+//				String pic64 = Base64.getEncoder().encodeToString(baops.toByteArray());// 转成Base64
+//				picMap.put(picName, "data:image/" + fileType + ";base64," + pic64);
+//			}
+//		}
+//		if (picMap.size() > 0) {
+//			parseImg();
+//		}
+//	}
 
 	/**
 	 * 获取文件类型
@@ -399,7 +433,9 @@ public class Word2HtmlUtil {
 			transFormer.transform(domSource, new StreamResult(sw));
 			return sw.toString();
 		} finally {
-			sw.close();
+			if (sw != null) {
+				sw.close();
+			}
 		}
 	}
 
