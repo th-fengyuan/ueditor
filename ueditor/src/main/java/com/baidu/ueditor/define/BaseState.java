@@ -31,6 +31,7 @@ public class BaseState implements State {
 		this.info = AppInfo.getStateInfo( infoCode );
 	}
 	
+	@Override
 	public boolean isSuccess () {
 		return this.state;
 	}
@@ -52,6 +53,7 @@ public class BaseState implements State {
 		return this.toString();
 	}
 	
+	@Override
 	public String toString () {
 		
 		String key = null;

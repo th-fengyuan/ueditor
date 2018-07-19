@@ -48,13 +48,9 @@ import org.w3c.dom.css.CSSStyleSheet;
 import com.steadystate.css.parser.CSSOMParser;
 
 /**
- * Created by 天涯06 on 2017-02-24. 使用的jar包： jsoup-1.10.2.jar
- * ooxml-schemas-1.1.jar openxml4j-1.0-beta.jar
- * org.apache.poi.xwpf.converter.core-1.0.6.jar
- * org.apache.poi.xwpf.converter.xhtml-1.0.6.jar poi-3.13-20150929.jar
- * poi-ooxml-3.13-20150929.jar poi-scratchpad-3.13-20150929.jar
- * xmlbeans-2.6.0.jar xml-apis-1.0.b2.jar jsoup-1.8.3.jar cssparser-0.9.25.jar
- * sac-1.3.jar commons-io-2.4.jar commons-fileupload-1.3.3.jar
+ * 
+ * @author TH_FengYuan
+ *
  */
 public class Word2HtmlUtil {
 

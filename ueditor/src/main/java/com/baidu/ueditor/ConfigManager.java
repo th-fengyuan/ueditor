@@ -26,15 +26,19 @@ public final class ConfigManager {
 	private final String rootPath;
 	private final String originalPath;
 	private final String contextPath;
-	private static final String configFileName = "config.json";
+	private static final String CONFIG_FILE_NAME = "config.json";
 	private String parentPath = null;
 	private JSONObject jsonConfig = null;
-	// 涂鸦上传filename定义
+	/**
+	 * 涂鸦上传filename定义
+	 */
 	private final static String SCRAWL_FILE_NAME = "scrawl";
-	// 远程图片抓取filename定义
+	/**
+	 * 远程图片抓取filename定义
+	 */
 	private final static String REMOTE_FILE_NAME = "remote";
 
-	/*
+	/**
 	 * 通过一个给定的路径构建一个配置管理器， 该管理器要求地址路径所在目录下必须存在config.properties文件
 	 */
 	private ConfigManager(String rootPath, String contextPath, String uri) throws FileNotFoundException, IOException {
@@ -147,11 +151,12 @@ public final class ConfigManager {
 		case ActionMap.IMPORT_WORD:
 			conf.put("importwordFieldName", this.jsonConfig.getString("importwordFieldName"));
 			savePath = this.jsonConfig.getString("importwordImgPath");
-
+		default:
 		}
 
 		conf.put("savePath", savePath);
 		conf.put("rootPath", this.rootPath);
+		conf.put("contextPath", this.contextPath);
 
 		return conf;
 
@@ -179,7 +184,7 @@ public final class ConfigManager {
 	}
 
 	private String getConfigPath() {
-		return this.parentPath + File.separator + ConfigManager.configFileName;
+		return this.parentPath + File.separator + ConfigManager.CONFIG_FILE_NAME;
 	}
 
 	private String[] getArray(String key) {

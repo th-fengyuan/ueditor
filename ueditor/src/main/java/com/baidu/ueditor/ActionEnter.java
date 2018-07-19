@@ -12,7 +12,11 @@ import com.baidu.ueditor.hunter.FileManager;
 import com.baidu.ueditor.hunter.ImageHunter;
 import com.baidu.ueditor.importword.ConvertWordToHTML;
 import com.baidu.ueditor.upload.Uploader;
-
+/**
+ * 
+ * @author www.baidu.com
+ *
+ */
 public class ActionEnter {
 	
 	private HttpServletRequest request = null;
@@ -54,7 +58,7 @@ public class ActionEnter {
 	
 	public String invoke() {
 		
-		if ( actionType == null || !ActionMap.mapping.containsKey( actionType ) ) {
+		if ( actionType == null || !ActionMap.MAPPING.containsKey( actionType ) ) {
 			return new BaseState( false, AppInfo.INVALID_ACTION ).toJSONString();
 		}
 		
@@ -97,6 +101,7 @@ public class ActionEnter {
 				conf = configManager.getConfig(actionCode);
 				state = new ConvertWordToHTML(this.request, conf).convert();
 				break;
+			default:
 				
 		}
 		//System.out.println(state.toJSONString());

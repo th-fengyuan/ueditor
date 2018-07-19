@@ -11,13 +11,16 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.json.JSONArray;
-import org.json.JSONWriter;
 
 import com.baidu.ueditor.PathFormat;
 import com.baidu.ueditor.define.BaseState;
 import com.baidu.ueditor.define.State;
 
+/**
+ * 
+ * @author TH_FengYuan
+ *
+ */
 public class ConvertWordToHTML {
 	private BaseState state;
 	private HttpServletRequest request;
@@ -52,10 +55,10 @@ public class ConvertWordToHTML {
 	private InputStream getFile() throws FileUploadException, IOException {
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload uploader = new ServletFileUpload(factory);
-		List<FileItem> FileItems = uploader.parseRequest(request);
+		List<FileItem> fileItems = uploader.parseRequest(request);
 		FileItem fileItem = null;
 		String fileName = null;
-		for (FileItem item : FileItems) {
+		for (FileItem item : fileItems) {
 			if(!item.isFormField()){
 				fileItem = item;
 				fileName = item.getName();

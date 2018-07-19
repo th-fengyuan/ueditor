@@ -11,8 +11,10 @@ import java.util.HashMap;
 @SuppressWarnings("serial")
 public final class ActionMap {
 
-	public static final Map<String, Integer> mapping;
-	// 获取配置请求
+	public static final Map<String, Integer> MAPPING;
+	/**
+	 * 获取配置请求
+	 */
 	public static final int CONFIG = 0;
 	public static final int UPLOAD_IMAGE = 1;
 	public static final int UPLOAD_SCRAWL = 2;
@@ -24,7 +26,7 @@ public final class ActionMap {
 	public static final int IMPORT_WORD = 8;
 	
 	static {
-		mapping = new HashMap<String, Integer>(){{
+		MAPPING = new HashMap<String, Integer>(){{
 			put( "config", ActionMap.CONFIG );
 			put( "uploadimage", ActionMap.UPLOAD_IMAGE );
 			put( "uploadscrawl", ActionMap.UPLOAD_SCRAWL );
@@ -38,7 +40,7 @@ public final class ActionMap {
 	}
 	
 	public static int getType ( String key ) {
-		return ActionMap.mapping.get( key );
+		return ActionMap.MAPPING.get( key );
 	}
 	
 }

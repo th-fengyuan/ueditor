@@ -5,7 +5,10 @@ import java.util.Map;
 
 public class MIMEType {
 
-	public static final Map<String, String> types = new HashMap<String, String>(){{
+	public static final Map<String, String> TYPES = new HashMap<String, String>(){
+		private static final long serialVersionUID = -2881802098108442811L;
+
+	{
 		put( "image/gif", ".gif" );
 		put( "image/jpeg", ".jpg" );
 		put( "image/jpg", ".jpg" );
@@ -14,7 +17,7 @@ public class MIMEType {
 	}};
 	
 	public static String getSuffix ( String mime ) {
-		return MIMEType.types.get( mime );
+		return MIMEType.TYPES.get( mime );
 	}
 	
 }
