@@ -34,5 +34,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="com.genuitec.runtime.library/com.genuitec.generic_6.0"/>
+	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/batik-all-1.7.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

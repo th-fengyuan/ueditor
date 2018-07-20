@@ -3,8 +3,6 @@ package com.baidu.ueditor.importword;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -31,7 +28,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.converter.PicturesManager;
 import org.apache.poi.hwpf.converter.WordToHtmlConverter;
-import org.apache.poi.hwpf.usermodel.Picture;
 import org.apache.poi.hwpf.usermodel.PictureType;
 import org.apache.poi.xwpf.converter.xhtml.XHTMLConverter;
 import org.apache.poi.xwpf.converter.xhtml.XHTMLOptions;
@@ -69,6 +65,7 @@ public class Word2HtmlUtil {
 	private File folder;
 	private String webPath;
 	private Map<String, String> picMap = new HashMap<String, String>();
+
 	private Word2HtmlUtil() {
 	}
 
@@ -243,7 +240,16 @@ public class Word2HtmlUtil {
 				public String savePicture(byte[] content, PictureType pictureType, String suggestedName,
 						float widthInches, float heightInches) {
 					String fileType = getFileType(suggestedName);
-					if(isImgFile){
+					try {
+						if ("emf".equals(fileType)) {
+							content = ImageUtil.emfToPng(content);
+						} else if ("wmf".equals(fileType)) {
+							content = ImageUtil.wmfToJpg(content);
+						}
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+					if (isImgFile) {
 						String fileName = getNewFileName(fileType, 6);
 						File file = new File(folder, fileName);
 						try {
@@ -259,10 +265,10 @@ public class Word2HtmlUtil {
 						} catch (Exception e) {
 							throw new RuntimeException(e);
 						}
-						return webPath+fileName;
-					}else{
+						return webPath + fileName;
+					} else {
 						String pic64 = Base64.getEncoder().encodeToString(content);// 转成Base64
-						return  "data:image/" + fileType + ";base64," + pic64;
+						return "data:image/" + fileType + ";base64," + pic64;
 					}
 				}
 			});
@@ -276,7 +282,7 @@ public class Word2HtmlUtil {
 			}
 		}
 	}
-	
+
 	/**
 	 * 解析docx文档
 	 * 
@@ -291,6 +297,7 @@ public class Word2HtmlUtil {
 			// 获取html数据
 			baOut = new ByteArrayOutputStream();
 			XHTMLConverter.getInstance().convert(xwpfDocument, baOut, options);
+			System.out.println(baOut.toString());
 			document = new W3CDom().fromJsoup(Jsoup.parse(baOut.toString()));
 			parseDocxImg(xwpfDocument);
 		} finally {
@@ -312,11 +319,11 @@ public class Word2HtmlUtil {
 		NodeList imgs = document.getElementsByTagName("img");
 		for (int i = 0; i < imgs.getLength(); i++) {
 			Element item = (Element) imgs.item(i);
-			if(!isDoc){
+			if (!isDoc) {
 				String src = item.getAttribute("src");
 				String imgPath = picMap.get(src);
-				if(imgPath!=null && !"".equals(imgPath)){
-					item.setAttribute("src",imgPath);
+				if (imgPath != null && !"".equals(imgPath)) {
+					item.setAttribute("src", imgPath);
 				}
 			}
 			String height;
@@ -352,52 +359,63 @@ public class Word2HtmlUtil {
 		for (XWPFPictureData picData : pics) {
 			String picType = picData.getPackagePart().getPartName().getExtension();
 			String imgKey = picData.getPackagePart().getPartName().getName().substring(1);
+			byte[] data = picData.getData();
+			try {
+				if ("emf".equals(picType)) {
+					data = ImageUtil.emfToPng(data);
+				} else if ("wmf".equals(picType)) {
+					data = ImageUtil.wmfToJpg(data);
+				}
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 			if (isImgFile) {
 				String fileName = this.getNewFileName(picType, 6);
 				File imgFile = new File(folder, fileName);
-				FileUtils.writeByteArrayToFile(imgFile, picData.getData());
+				FileUtils.writeByteArrayToFile(imgFile, data);
 				picMap.put(imgKey, webPath + fileName);
 			} else {
-				String pic64 = Base64.getEncoder().encodeToString(picData.getData());// 转成Base64
+				String pic64 = Base64.getEncoder().encodeToString(data);// 转成Base64
 				picMap.put(imgKey, "data:image/" + picType + ";base64," + pic64);
 			}
 		}
 		parseImg();
 	}
 
-//	/**
-//	 * 处理Doc的图片 将图片转换成64位编码，插入的文档中
-//	 * 
-//	 * @param pics
-//	 * @param document
-//	 * @throws Exception
-//	 */
-//	private void parseDocImg(HWPFDocument wordDocument) throws Exception {
-//		// 获取文档上的所有图片
-//		List<Picture> pics = wordDocument.getPicturesTable().getAllPictures();
-//		if (pics == null) {
-//			return;
-//		}
-//		ByteArrayOutputStream baops = new ByteArrayOutputStream();
-//		for (Picture pic : pics) {
-//			baops.reset();// 清空流
-//			pic.writeImageContent(baops);// 将图片写入二进制流中
-//			String picName = pic.suggestFullFileName();// 获取文件名
-//			String fileType = getFileType(picName);
-//			if (isImgFile) {
-//				String fileName = getNewFileName(fileType, 6);
-//				File imgFile = new File(folder, fileName);
-//				FileUtils.writeByteArrayToFile(imgFile, baops.toByteArray());
-//				picMap.put(picName, webPath + fileName);
-//			} else {
-//				String pic64 = Base64.getEncoder().encodeToString(baops.toByteArray());// 转成Base64
-//				picMap.put(picName, "data:image/" + fileType + ";base64," + pic64);
-//			}
-//		}
-//		if (picMap.size() > 0) {
-//			parseImg();
-//		}
-//	}
+	// /**
+	// * 处理Doc的图片 将图片转换成64位编码，插入的文档中
+	// *
+	// * @param pics
+	// * @param document
+	// * @throws Exception
+	// */
+	// private void parseDocImg(HWPFDocument wordDocument) throws Exception {
+	// // 获取文档上的所有图片
+	// List<Picture> pics = wordDocument.getPicturesTable().getAllPictures();
+	// if (pics == null) {
+	// return;
+	// }
+	// ByteArrayOutputStream baops = new ByteArrayOutputStream();
+	// for (Picture pic : pics) {
+	// baops.reset();// 清空流
+	// pic.writeImageContent(baops);// 将图片写入二进制流中
+	// String picName = pic.suggestFullFileName();// 获取文件名
+	// String fileType = getFileType(picName);
+	// if (isImgFile) {
+	// String fileName = getNewFileName(fileType, 6);
+	// File imgFile = new File(folder, fileName);
+	// FileUtils.writeByteArrayToFile(imgFile, baops.toByteArray());
+	// picMap.put(picName, webPath + fileName);
+	// } else {
+	// String pic64 = Base64.getEncoder().encodeToString(baops.toByteArray());//
+	// 转成Base64
+	// picMap.put(picName, "data:image/" + fileType + ";base64," + pic64);
+	// }
+	// }
+	// if (picMap.size() > 0) {
+	// parseImg();
+	// }
+	// }
 
 	/**
 	 * 获取文件类型
