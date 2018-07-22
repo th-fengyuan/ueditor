@@ -24702,7 +24702,7 @@ UE.plugin.register('importword', function (){
                                 'timeout': 3000
                             });
                         } else {
-                            showErrorLoader && showErrorLoader(json.content);
+                            showErrorLoader && showErrorLoader(json.state);
                         }
                     }catch(er){
                         showErrorLoader && showErrorLoader(me.getLang('importword.parseError'));

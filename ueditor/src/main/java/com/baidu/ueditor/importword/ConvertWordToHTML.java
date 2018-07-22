@@ -13,6 +13,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.baidu.ueditor.PathFormat;
+import com.baidu.ueditor.define.AppInfo;
 import com.baidu.ueditor.define.BaseState;
 import com.baidu.ueditor.define.State;
 
@@ -22,7 +23,6 @@ import com.baidu.ueditor.define.State;
  *
  */
 public class ConvertWordToHTML {
-	private BaseState state;
 	private HttpServletRequest request;
 	private Map<String, Object> config;
 	private String fileType;
@@ -33,58 +33,65 @@ public class ConvertWordToHTML {
 	}
 
 	public State convert() {
-		state = new BaseState();
 		try {
 			String rootPath = config.get("rootPath").toString();
 			String savePath = PathFormat.parse(config.get("savePath").toString());
-			InputStream is = getFile();
-			Word2HtmlUtil word2HtmlUtil = Word2HtmlUtil.getInstance(is, fileType, rootPath + savePath, savePath);
+			FileItem fileItem = getFile();
+			if(fileItem==null){
+				return new BaseState(false,AppInfo.NOTFOUND_UPLOAD_DATA);
+			}
+			State state = check(fileItem);
+			if(!state.isSuccess()){
+				return state;
+			}
+			Word2HtmlUtil word2HtmlUtil = Word2HtmlUtil.getInstance(fileItem.getInputStream(), fileType, rootPath + savePath, savePath);
 			String html = word2HtmlUtil.getHTML();
 			html = parseHTML(html);
-			System.out.println(html);
-			state.setState(true);
 			state.putInfo("content", html);
+			return state;
 		} catch (Exception e) {
 			e.printStackTrace();
-			state.setState(false);
-			state.putInfo("content", "解析失败，请稍后再试!");
+			return new BaseState(false,"解析失败，请稍后再试!");
 		}
-		return state;
 	}
 
-	private InputStream getFile() throws FileUploadException, IOException {
+	private FileItem getFile() throws FileUploadException, IOException {
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload uploader = new ServletFileUpload(factory);
 		List<FileItem> fileItems = uploader.parseRequest(request);
-		FileItem fileItem = null;
-		String fileName = null;
 		for (FileItem item : fileItems) {
-			if(!item.isFormField()){
-				fileItem = item;
-				fileName = item.getName();
-				break;
+			if (!item.isFormField()) {
+				return item;
 			}
 		}
+		return null;
+	}
+
+	public State check(FileItem fileItem) {
+		BaseState state = new BaseState(false);
+		String fileName = fileItem.getName();
 		int fileTypeIndex = fileName.lastIndexOf(".");
 		if (fileTypeIndex != -1) {
 			fileType = fileName.substring(fileTypeIndex);
 		}
 		boolean isCheckFileType = ".doc".equals(fileType) || ".docx".equals(fileType);
+		long fileSize = fileItem.getSize();
+		long maxSize = ((Long) config.get("importwordMaxSize")).longValue();
 		if (isCheckFileType) {
-			return fileItem.getInputStream();
+			if (fileSize <= maxSize) {
+				state.setState(true);
+			} else {
+				state.setInfo(AppInfo.MAX_SIZE);
+			}
+		} else {
+			state.setInfo(AppInfo.NOT_ALLOW_FILE_TYPE);
 		}
-		state.setState(false);
-		state.putInfo("content", "不支持的文件类型!");
-		return null;
+		return state;
 	}
-	
-	
-	public String parseHTML(String html){
-		html = html.replaceAll("(<|&lt;)", "#<#")
-					.replaceAll("(>|&gt;)", "#>#")
-					.replaceAll("(\"|&quot;)", "#@@#")
-					.replaceAll("('|&acute;)", "#@#")
-					.replaceAll("\r\n\t", "");
+
+	public String parseHTML(String html) {
+		html = html.replaceAll("(<|&lt;)", "#<#").replaceAll("(>|&gt;)", "#>#").replaceAll("(\"|&quot;)", "#@@#")
+				.replaceAll("('|&acute;)", "#@#").replaceAll("\r\n\t", "");
 		return html.toString();
 	}
 }

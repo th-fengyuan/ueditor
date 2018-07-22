@@ -104,7 +104,6 @@ public class ActionEnter {
 			default:
 				
 		}
-		//System.out.println(state.toJSONString());
 		return state.toJSONString();
 		
 	}

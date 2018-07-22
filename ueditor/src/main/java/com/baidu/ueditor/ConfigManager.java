@@ -150,14 +150,13 @@ public final class ConfigManager {
 			break;
 		case ActionMap.IMPORT_WORD:
 			conf.put("importwordFieldName", this.jsonConfig.getString("importwordFieldName"));
+			conf.put("importwordMaxSize", this.jsonConfig.getLong("importwordMaxSize"));
 			savePath = this.jsonConfig.getString("importwordImgPath");
 		default:
 		}
-
 		conf.put("savePath", savePath);
 		conf.put("rootPath", this.rootPath);
 		conf.put("contextPath", this.contextPath);
-
 		return conf;
 
 	}

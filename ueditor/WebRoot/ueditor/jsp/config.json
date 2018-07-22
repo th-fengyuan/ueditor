@@ -90,7 +90,8 @@
         ".rar", ".zip", ".tar", ".gz", ".7z", ".bz2", ".cab", ".iso",
         ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pdf", ".txt", ".md", ".xml"
     ], /* 列出的文件类型 */
-    "importwordActionName":"importword",
-    "importwordFieldName":"upfile",
+    "importwordActionName":"importword",/*执行word导入的action*/
+    "importwordFieldName":"upfile",/*提交文件的表单名称*/
+    "importwordMaxSize":4096000,/*导入Word的大小限制，单位B，默认4MB*/
 	"importwordImgPath":"/ueditor/jsp/upload/image/{yyyy}{mm}{dd}/"/*word文档中的图片保存路径*/
 }
