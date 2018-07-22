@@ -1,39 +1,52 @@
 # ueditor
 
 #### 项目介绍
-{**以下是码云平台说明，您可以替换为您的项目简介**
-码云是开源中国推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用码云实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+UEditor 是由百度「FEX前端研发团队」开发的所见即所得富文本web编辑器，具有轻量，可定制，注重用户体验等特点，开源基于MIT协议，允许自由使用和修改代码。在原有基础上增加Word导入功能，Word导入可以解析Word文档中的图片。[点击访问官网](http://ueditor.baidu.com/website/index.html)
 
 #### 软件架构
-软件架构说明
+
+```
+batik-all-1.7.jar
+commons-codec-1.9.jar
+commons-fileupload-1.3.3.jar
+commons-io-2.2.jar
+cssparser-0.9.25.jar
+dom4j-1.6.1.jar
+freehep-graphics2d-2.3.jar
+freehep-graphicsbase-2.3.jar
+freehep-graphicsio-2.3.jar
+freehep-graphicsio-emf-2.3.jar
+freehep-graphicsio-tests-2.3.jar
+freehep-io-2.2.2.jar
+hamcrest-core-1.1.jar
+json-20160810.jar
+jsoup-1.8.3.jar
+junit-4.10.jar
+log4j-1.2.8.jar
+ooxml-schemas-1.1.jar
+openxml4j-1.0-beta.jar
+org.apache.poi.xwpf.converter.core-1.0.6.jar
+org.apache.poi.xwpf.converter.xhtml-1.0.6.jar
+poi-3.13.jar
+poi-ooxml-3.13.jar
+poi-ooxml-schemas-3.13.jar
+poi-scratchpad-3.13.jar
+sac-1.3.jar
+stax-api-1.0.1.jar
+wmf2svg-0.9.5.jar
+xml-apis-1.0.b2.jar
+xml-apis-ext-1.3.04.jar
+xmlbeans-2.3.0.jar
+```
 
 
 #### 安装教程
 
-1. xxxx
-2. xxxx
-3. xxxx
+1. pom文件中缺少batik-all-1.7.jar，可以在WEB-INF/lib目录下找到。
+2. 也可以点击链接下载所有jar包。链接:https://pan.baidu.com/s/1e4kAkG5_ygiApGJYBpsfWg 密码:1k8q
+3. 可以下载已打包好的文件，然后引入ueditorjsp/lib目录下的所有jar包，或者引入pom文件，然后单独引入batik-all-1.7.jar和ueditor.jar
 
 #### 使用说明
 
-1. xxxx
-2. xxxx
-3. xxxx
-
-#### 参与贡献
-
-1. Fork 本项目
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request
-
-
-#### 码云特技
-
-1. 使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2. 码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3. 你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4. [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5. 码云官方提供的使用手册 [http://git.mydoc.io/](http://git.mydoc.io/)
-6. 码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+1. 官方文档：http://fex.baidu.com/ueditor/
+2. 官方API：http://ueditor.baidu.com/doc/
