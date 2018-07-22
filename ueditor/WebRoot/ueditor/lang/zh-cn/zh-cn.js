@@ -86,7 +86,8 @@ UE.I18N['zh-cn'] = {
     'importword':{
     	'jsonEncodeError': '服务器返回格式错误',
     	'parseError': '解析错误',
-    	'exceedTypeError': '文件格式不允许'
+    	'exceedTypeError': '文件格式不允许',
+    	'exceedSizeError': '文件大小超出限制'
     },
     'elementPathTip':"元素路径",
     'wordCountTip':"字数统计",

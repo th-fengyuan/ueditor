@@ -24733,6 +24733,12 @@ UE.plugin.register('importword', function (){
                     showErrorLoader(me.getLang('importword.exceedTypeError'));
                     return;
                 }
+                var maxSize = me.getOpt('importwordMaxSize');
+                var fileSize = input.files[0].lenght;
+                if(fileSize>maxSize){
+                	showErrorLoader(me.getLang('importword.exceedSizeError'));
+                	return;
+                }
                 message.appendChild(load);
                 me.setDisabled();
                 domUtils.on(iframe, 'load', callback);
