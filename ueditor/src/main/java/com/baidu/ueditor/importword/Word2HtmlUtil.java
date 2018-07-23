@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hwpf.HWPFDocument;
@@ -267,7 +267,7 @@ public class Word2HtmlUtil {
 						}
 						return webPath + fileName;
 					} else {
-						String pic64 = Base64.getEncoder().encodeToString(content);// 转成Base64
+						String pic64 = Base64.encodeBase64String(content);// 转成Base64
 						return "data:image/" + fileType + ";base64," + pic64;
 					}
 				}
@@ -375,7 +375,7 @@ public class Word2HtmlUtil {
 				FileUtils.writeByteArrayToFile(imgFile, data);
 				picMap.put(imgKey, webPath + fileName);
 			} else {
-				String pic64 = Base64.getEncoder().encodeToString(data);// 转成Base64
+				String pic64 = Base64.encodeBase64String(data);// 转成Base64
 				picMap.put(imgKey, "data:image/" + picType + ";base64," + pic64);
 			}
 		}
