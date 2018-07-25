@@ -44,7 +44,7 @@ xmlbeans-2.3.0.jar
 
 1. pom文件中缺少batik-all-1.7.jar，可以在WEB-INF/lib目录下找到。
 2. 也可以点击链接下载所有jar包。链接:https://pan.baidu.com/s/1e4kAkG5_ygiApGJYBpsfWg 密码:1k8q
-3. 可以下载已打包好的文件，然后引入ueditorjsp/lib目录下的所有jar包，或者引入pom文件，然后单独引入batik-all-1.7.jar和ueditor.jar。链接: https://pan.baidu.com/s/1BXVmbhbytppCXjIo2g9UUA 密码: p5ym
+3. 可以下载已打包好的文件，然后引入所有的jar包，或者引入pom文件，然后单独引入batik-all-1.7.jar和ueditor.jar，ueditor.jar可以在ueditor/jsp/lib目录下找到。链接: https://pan.baidu.com/s/1BXVmbhbytppCXjIo2g9UUA 密码: p5ym
 
 #### 使用说明
 
