@@ -50,6 +50,3 @@ xmlbeans-2.3.0.jar
 
 1. 官方文档：http://fex.baidu.com/ueditor/
 2. 官方API：http://ueditor.baidu.com/doc/
-
-#### 联系方式
-邮箱：th_fengyuan@163.com
